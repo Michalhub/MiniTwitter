@@ -5,13 +5,14 @@ require_once 'config.php';
 
 class User
 {
-	private $id = -1;
+	private $id;
 	private $username;
 	private $email;
 	private $hashPass;
 
 	public function __construct()
 	{
+	    $this->id = -1;
 		$this->username = '';
 		$this->email = '';
 		$this->hashPass = '';
