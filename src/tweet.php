@@ -10,17 +10,17 @@ class Tweet
     public function __construct()
     {
         $this->id = $id = -1;
-        $this->user_id = $user_id = 0;
-        $this->text = $text = 0;
-        $this->creationDate = $creationDate = 0;
+        $this->user_id = '';
+        $this->text = '';
+        $this->creationDate = '';
     }
 
-    public function loadTweetById(PDO $conn, $id)
+    public static function loadTweetById(PDO $conn, $id)
     {
-        $sql = 'SELECT * FROM Tweets WHERE id= :id';
+        $sql = 'SELECT * FROM Tweet WHERE id= :id';
 
         $stmt = $conn->prepare($sql);
-        $result = $stmt->execute(['id' => $id]);
+        $result = $stmt->execute([':id' => $id]);
 
         if ($result && $stmt->rowCount() == 1) {
             $tweetData = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -29,41 +29,58 @@ class Tweet
             $tweet->id = $tweetData['id'];
             $tweet->text = $tweetData['text'];
             $tweet->creationDate = $tweetData['creationDate'];
+        } else {
+            return null;
         }
     }
 
     public static function loadAllTweets(PDO $conn)
     {
-        $sql = 'SELECT * FROM Tweets ORDERED BY id';
+        $sql = 'SELECT Tweet.id, user_id, username, `text`, creationDate FROM Users JOIN Tweet WHERE Users.id=Tweet.user_id ORDER BY creationDate DESC';
 
         $tweets = [];
+
         $result = $conn->query($sql);
 
         if ($result && $result->rowCount() > 0) {
             foreach ($result->fetchAll(PDO::FETCH_ASSOC) AS $tweetData) {
-                $tweets = new Tweet;
-                $tweets->id = $tweetData['id'];
-                $tweets->text = $tweetData['text'];
-                $tweets->creationDate = $tweetData['creationDate'];
+                $tweet = new Tweet;
+
+                $tweet->id = $tweetData['id'];
+                $tweet->user_id = $tweetData['user_id'];
+                $tweet->userName = $tweetData['username'];
+                $tweet->text = $tweetData['text'];
+                $tweet->creationDate = $tweetData['creationDate'];
+                $tweets[] = $tweet;
             }
 
+            return $tweets;
+        } else {
+            return null;
         }
     }
 
-    public static function loadAllTweetsByUserId(PDO $conn)
+    public static function loadAllTweetsByUserId(PDO $conn, $user_id)
     {
-        $sql = 'SELECT * FROM Tweets ORDERED BY $user_id';
+        $sql = 'SELECT * FROM Users JOIN Tweet ON Users.id=Tweet.user_id WHERE user_id = :user_id';
 
         $tweets = [];
-        $result = $conn->query($sql);
 
-        if ($result && $result->rowCount() > 0) {
-            foreach ($result->fetchAll(PDO::FETCH_ASSOC) AS $tweetData) {
-                $tweets = new Tweet;
-                $tweets->id = $tweetData['user_id'];
-                $tweets->text = $tweetData['text'];
-                $tweets->creationDate = $tweetData['creationDate'];
+        $stmt = $conn->prepare($sql);
+        $result = $stmt->execute([':user_id' => $user_id]);
+
+        if ($result && $stmt->rowCount() > 0) {
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) AS $tweetData) {
+                $tweet = new Tweet;
+
+                $tweet->id = $tweetData['id'];
+                $tweet->user_id = $tweetData['user_id'];
+                $tweet->text = $tweetData['text'];
+                $tweet->creationDate = $tweetData['creationDate'];
+                $tweets[] = $tweet;
             }
+
+            return $tweets;
 
         } else {
             return null;
@@ -73,7 +90,7 @@ class Tweet
 
     public static function loadTweetByUserId(PDO $conn, $user_id)
     {
-        $sql = 'SELECT * FROM Tweets WHERE id = :user_id';
+        $sql = 'SELECT * FROM Tweet WHERE id = :user_id';
 
         $stmt = $conn->prepare($sql);
         $result = $stmt->execute(['user_id' => $user_id]);
@@ -93,13 +110,13 @@ class Tweet
     public function saveTweetToDB(PDO $conn) : bool
     {
         if ($this->id == -1) {
-            $sql = "INSERT INTO Tweets(text, creationDate) VALUES (:text, :creationDate)";
+            $sql = "INSERT INTO Tweet(`text`, user_id, creationDate) VALUES (:text, :user_id, NOW())";
 
             $stmt = $conn->prepare($sql);
 
             $stmt->execute([
                 ':text' => $this->text,
-                ':creationDate' => $this->creationDate
+                ':user_id' => $this->user_id
             ]);
             $this->id = $conn->lastInsertId();
 

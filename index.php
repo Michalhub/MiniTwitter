@@ -46,16 +46,21 @@ foreach (User::loadAllUsers($conn) as $key => $user) {
 
     var_dump($user);
 }
-*/
 
-foreach (User::loadAllUsers($conn) as $key => $user) {
+foreach (User::loadAllUsers($conn) as $key => $user) { 
     print_r($user);
     echo "<br />";
 }
+*/
 //$user = User::loadUserById($conn , 27);
 //$user->delete($conn);
 //var_dump($user);
 
+$a = new Tweet;
+
+$a->setText("some textttt");
+$a->setUserId(1);
 
 
 
+print_r(Tweet::loadAllTweetsByUserId($conn, 1));
