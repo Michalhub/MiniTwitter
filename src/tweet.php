@@ -32,11 +32,16 @@ class Tweet
         } else {
             return null;
         }
+
+        return $tweet;
     }
 
     public static function loadAllTweets(PDO $conn)
     {
-        $sql = 'SELECT Tweet.id, user_id, username, `text`, creationDate FROM Users JOIN Tweet WHERE Users.id=Tweet.user_id ORDER BY creationDate DESC';
+        $sql = 'SELECT Tweet.id, user_id, username, `text`, creationDate 
+                FROM Users 
+                JOIN Tweet 
+                WHERE Users.id=Tweet.user_id ORDER BY creationDate DESC';
 
         $tweets = [];
 
@@ -62,7 +67,9 @@ class Tweet
 
     public static function loadAllTweetsByUserId(PDO $conn, $user_id)
     {
-        $sql = 'SELECT * FROM Users JOIN Tweet ON Users.id=Tweet.user_id WHERE user_id = :user_id';
+        $sql = 'SELECT * FROM Users 
+                JOIN Tweet ON Users.id=Tweet.user_id 
+                WHERE user_id = :user_id';
 
         $tweets = [];
 
@@ -107,32 +114,22 @@ class Tweet
         }
     }
 
-    public function saveTweetToDB(PDO $conn) : bool
+    public function saveToDB(PDO $conn) : bool
     {
         if ($this->id == -1) {
-            $sql = "INSERT INTO Tweet(`text`, user_id, creationDate) VALUES (:text, :user_id, NOW())";
+            $sql = 'INSERT INTO Tweet(`text`, user_id, creationDate) VALUES (:text, :user_id, NOW())';
 
             $stmt = $conn->prepare($sql);
-
-            $stmt->execute([
+            $result = $stmt->execute([
                 ':text' => $this->text,
-                ':user_id' => $this->user_id
+                ':user_id' => $this->user_id,
             ]);
-            $this->id = $conn->lastInsertId();
 
-            return true;
-        } else {
-            $sql = "UPDATE Users SET username = :username, email = :email, hash_pass = :hash_pass WHERE id = :id";
-
-            $stmt = $conn->prepare($sql);
-
-            return $stmt->execute([
-                ':username' => $this->username,
-                ':email' => $this->email,
-                ':hash_pass' => $this->hashPass,
-                ':id' => $this->id,
-
-            ]);
+            if (!$result) {
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 

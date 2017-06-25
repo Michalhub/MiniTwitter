@@ -3,8 +3,7 @@
 require_once 'config.php';
 require_once 'src/user.php';
 require_once 'src/tweet.php';
-
-
+require_once 'src/comment.php';
 
 
 
@@ -56,11 +55,14 @@ foreach (User::loadAllUsers($conn) as $key => $user) {
 //$user->delete($conn);
 //var_dump($user);
 
-$a = new Tweet;
+$a = new Comment;
+/*
+$a->setUserId('2');
+$a->setPostId('2');
+$a->setTextComment('some dumb text');
 
-$a->setText("some textttt");
-$a->setUserId(1);
+$a->saveToDB($conn);
+*/
 
+print_r(Comment::loadAllCommentsByPostId($conn, 2));
 
-
-print_r(Tweet::loadAllTweetsByUserId($conn, 1));

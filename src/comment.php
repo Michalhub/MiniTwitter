@@ -1,46 +1,97 @@
 <?php
 
-require 'config.php';
 
 class Comment
 {
 	private $id;
-	private $userId;
-	private $postId;
-	private $creation_date;
-	private $text;
+	private $user_id;
+	private $post_id;
+	private $creationDate;
+	private $textComment;
 
 	public function __construct()
 	{
 		$this->id = -1;
-		$this->userId = 0;
-		$this->postId = 0;
-		$this->creation_date = '';
-		$this->text = '';
-
+		$this->user_id = '';
+		$this->post_id = '';
+		$this->creationDate = '';
+		$this->textComment = '';
 	}
 
-    public function getUserId()
+	public static function loadCommentById($conn, $id)
     {
-        return $this->userId;
+        $sql = 'SELECT * FROM Comment WHERE id= :id';
+
+        $stmt = $conn->prepare($sql);
+        $result = $stmt->execute([':id' => $id]);
+
+        if ($result && $stmt->rowCount() == 1) {
+            $commentData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $comment = new Comment;
+
+            $comment->id = $commentData['id'];
+            $comment->user_id = $commentData['user_id'];
+            $comment->post_id = $commentData['post_id'];
+            $comment->textComment = $commentData['textComment'];
+            $comment->creationDate = $commentData['creationDate'];
+
+        } else {
+            return null;
+        }
+
+        return $comment;
     }
 
-
-    public function setUserId($userId)
+    public static function loadAllCommentsByPostId(PDO $conn, $post_id) //////////////////////
     {
-        $this->userId = $userId;
+        $sql = 'SELECT * FROM Comment WHERE post_id = :post_id ORDER BY creationDate DESC';
+
+        $stmt = $conn->prepare($sql);
+        $result = $stmt->execute(['post_id' =>$post_id ]);
+
+        $comments = [];
+
+        if ($result && $stmt->rowCount() > 0) {
+            foreach($stmt->fetchAll(PDO::FETCH_ASSOC) as $commentData) {
+                $comment = new Comment();
+
+                $comment->id = $commentData['id'];
+                $comment->post_id = $commentData['post_id'];
+                $comment->user_id = $commentData['user_id'];
+                $comment->textComment = $commentData['textComment'];
+                $comment->creationDate = $commentData['creationDate'];
+
+                $comments[] = $comment;
+            }
+
+            return $comments;
+        } else {
+            return null;
+        }
     }
 
-
-    public function getPostId()
+    public function saveToDB(PDO $conn) : bool
     {
-        return $this->postId;
+        if ($this->id == -1) {
+            $sql = 'INSERT INTO Comment (`textComment`, user_id, post_id, creationDate) VALUES (:textComment, :user_id, :post_id, NOW())';
+
+            $stmt = $conn->prepare($sql);
+
+            $stmt->execute([
+                ':textComment' => $this->textComment,
+                ':user_id' => $this->user_id,
+                ':post_id' => $this->post_id,
+            ]);
+            $this->id = $conn->lastInsertId();
+
+            return true;
+        }
     }
 
-
-    public function setPostId($postId)
+    public function getId()
     {
-        $this->postId = $postId;
+        return $this->id;
     }
 
     public function getCreationDate()
@@ -53,20 +104,34 @@ class Comment
         $this->creation_date = $creation_date;
     }
 
-    public function getText()
+    public function getTextComment()
     {
-        return $this->text;
+        return $this->textComment;
     }
 
-    public function setText($text)
+    public function setTextComment($textComment)
     {
-        $this->text = $text;
+        $this->textComment = $textComment;
     }
 
-    public function getId()
+    public function getUserId()
     {
-        return $this->id;
+        return $this->user_id;
     }
 
-	
+    public function setUserId($user_id)
+    {
+        $this->user_id = $user_id;
+    }
+
+    public function getPostId()
+    {
+        return $this->post_id;
+    }
+
+    public function setPostId($post_id)
+    {
+        $this->post_id = $post_id;
+    }
+
 }
