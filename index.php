@@ -1,9 +1,9 @@
 <?php
 
 require_once 'config.php';
-require_once 'src/user.php';
-require_once 'src/tweet.php';
-require_once 'src/comment.php';
+require_once 'src/User.php';
+require_once 'src/Tweet.php';
+require_once 'src/Comment.php';
 
 
 

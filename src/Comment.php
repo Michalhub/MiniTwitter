@@ -45,7 +45,9 @@ class Comment
 
     public static function loadAllCommentsByPostId(PDO $conn, $post_id) //////////////////////
     {
-        $sql = 'SELECT * FROM Comment WHERE post_id = :post_id ORDER BY creationDate DESC';
+        $sql = 'SELECT * FROM Comment 
+                WHERE post_id = :post_id 
+                ORDER BY creationDate DESC';
 
         $stmt = $conn->prepare($sql);
         $result = $stmt->execute(['post_id' =>$post_id ]);
@@ -74,7 +76,8 @@ class Comment
     public function saveToDB(PDO $conn) : bool
     {
         if ($this->id == -1) {
-            $sql = 'INSERT INTO Comment (`textComment`, user_id, post_id, creationDate) VALUES (:textComment, :user_id, :post_id, NOW())';
+            $sql = 'INSERT INTO Comment (`textComment`, user_id, post_id, creationDate) 
+                    VALUES (:textComment, :user_id, :post_id, NOW())';
 
             $stmt = $conn->prepare($sql);
 
@@ -96,12 +99,12 @@ class Comment
 
     public function getCreationDate()
     {
-        return $this->creation_date;
+        return $this->creationDate;
     }
 
-    public function setCreationDate($creation_date)
+    public function setCreationDate($creationDate)
     {
-        $this->creation_date = $creation_date;
+        $this->creation_date = $creationDate;
     }
 
     public function getTextComment()

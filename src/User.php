@@ -1,7 +1,5 @@
 
 <?php
-require_once 'config.php';
-
 
 class User
 {
@@ -17,6 +15,35 @@ class User
 		$this->email = '';
 		$this->hashPass = '';
 	}
+
+	public static function userLogin (PDO $conn, $login, $pass) 
+	{
+       	$query = "SELECT * FROM Users WHERE email = :login";
+
+        $stmt = $conn->prepare($query);
+        $result = $stmt->execute([
+                ':login' => $login
+            ]);
+
+            if ($result && $stmt->rowCount() == 1) {
+                $loggedUser = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (password_verify($pass, $loggedUser['hash_pass'])) {
+                    $user = new User();
+                    $user->id = $loggedUser['id'];
+                    $user->username = $loggedUser['username'];
+                    $user->email = $loggedUser['email'];
+                    $_SESSION['loggedUser'] = $user;
+                    header("Location:index.php");
+                } else {
+                    $_SESSION['msg'] = 'Podane hasło jest niepoprawne';
+                    header("Location:index.php");
+                }
+            } else {
+                $_SESSION['msg'] = "W bazie danych nie ma użytkownika $login!";
+                header("Location:index.php");
+            }
+    }
 
 	public static function loadAllUsers(PDO $conn)
 	{

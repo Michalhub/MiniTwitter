@@ -36,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <h3>Drop me a line!</h3>
             <hr>
             <address>
-                <strong>Email:</strong> <a href="mailto:#"> name@domain.com</a><br><br>
-                <strong>Phone:</strong> (555)123-4567
+                <strong>Email:</strong> <a href="mailto:#"> mic.strojny@gmail.com</a><br><br>
+                <strong>Phone:</strong> (123)123-4567
             </address>
         </div>
 
